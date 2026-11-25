@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Margin Radar — Live Shopify Profit & Risk Analytics</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #0284c7;
+      --primary-hover: #0369a1;
+      --accent-soft: #e0f2fe;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --warn-bg: #fef3c7;
+      --warn-text: #92400e;
+      --err-bg: #fee2e2;
+      --err-text: #991b1b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: linear-gradient(180deg, #e0f2fe 0%, var(--bg) 260px);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 28px 16px 48px;
+    }
+
+    .container {
+      max-width: 1120px;
+      margin: 0 auto;
+    }
+
+    .header-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+      margin-bottom: 20px;
+    }
+
+    .brand h1 {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .brand p {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shop-input {
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      min-width: 245px;
+      background: #ffffff;
+      color: var(--text);
+    }
+
+    .shop-input:focus {
+      outline: 2px solid #bae6fd;
+      border-color: var(--primary);
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: var(--warn-bg);
+      color: var(--warn-text);
+    }
+
+    .badge.connected {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    .badge.error {
+      background: var(--err-bg);
+      color: var(--err-text);
+    }
+
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background: #f1f5f9;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: #e2e8f0;
+    }
+
+    .error-box {
+      display: none;
+      background: var(--err-bg);
+      color: var(--err-text);
+      border: 1px solid #fecaca;
+      border-radius: 12px;
+      padding: 14px 18px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+    }
+
+    .auth-banner {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    .auth-banner h2 {
+      font-size: 1.15rem;
+      margin-bottom: 8px;
+    }
+
+    .auth-banner p {
+      color: var(--muted);
+      font-size: 0.92rem;
+      margin-bottom: 18px;
+    }
+
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 20px;
+    }
+
+    .kpi-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+    }
+
+    .kpi-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 1.55rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .main-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .tab-btn {
+      background: #f1f5f9;
+      color: var(--muted);
+      padding: 8px 15px;
+      border-radius: 9px;
+      font-size: 0.88rem;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: #ffffff;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .panel-header h3 {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--muted);
+      padding: 28px 12px;
+    }
+
+    .footer {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-card">
+      <div class="brand">
+        <h1>Margin Radar</h1>
+        <p id="subtitle">Live Shopify store profit, risk, and order analytics</p>
+      </div>
+
+      <div class="controls">
+        <input
+          id="shopInput"
+          class="shop-input"
+          type="text"
+          placeholder="your-store.myshopify.com"
+          aria-label="Shopify store domain"
+        />
+        <span id="statusBadge" class="badge">Authorization required</span>
+        <button id="syncBtn" class="btn-secondary" type="button">Sync now</button>
+        <button id="topAuthBtn" class="btn-primary" type="button">Authorize store</button>
+      </div>
+    </div>
+
+    <div id="errorBox" class="error-box"></div>
+
+    <div id="authBanner" class="auth-banner">
+      <h2 id="bannerTitle">Store authorization required</h2>
+      <p id="bannerDesc">
+        Connect your Shopify store via OAuth to store its persistent access token and load live metrics.
+      </p>
+      <button id="mainAuthBtn" class="btn-primary" type="button">Authorize store</button>
+    </div>
+
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Gross Revenue</div>
+        <div id="kpiRevenue" class="kpi-value">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Orders Loaded</div>
+        <div id="kpiOrders" class="kpi-value">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Products Loaded</div>
+        <div id="kpiProducts" class="kpi-value">—</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">High-Risk Orders</div>
+        <div id="kpiRisk" class="kpi-value">—</div>
+      </div>
+    </div>
+
+    <div class="main-card">
+      <div class="tabs">
+        <button id="tabOrders" class="tab-btn active" type="button">Orders</button>
+        <button id="tabRisk" class="tab-btn" type="button">Risk Radar</button>
+        <button id="tabProducts" class="tab-btn" type="button">Products</button>
+      </div>
+
+      <div id="panelOrders">
+        <div class="panel-header">
+          <h3>Live Shopify Orders</h3>
+          <span id="ordersMeta" style="color: var(--muted); font-size: 0.85rem;"></span>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Financial Status</th>
+              <th>Total</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="ordersBody">
+            <tr><td colspan="4" class="empty-state">No live orders loaded yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="panelRisk" style="display: none;">
+        <div class="panel-header">
+          <h3>Order Risk Evaluation</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Order</th>
+              <th>Risk Level</th>
+              <th>Amount</th>
+              <th>Reason</th>
+            </tr>
+          </thead>
+          <tbody id="riskBody">
+            <tr><td colspan="4" class="empty-state">Authorize and sync a store to inspect order risk.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div id="panelProducts" style="display: none;">
+        <div class="panel-header">
+          <h3>Live Shopify Products</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Product Title</th>
+              <th>Status</th>
+              <th>Vendor</th>
+            </tr>
+          </thead>
+          <tbody id="productsBody">
+            <tr><td colspan="3" class="empty-state">No live products loaded yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      <span id="connectedStoreLabel">Connected store: none</span>
+      <span>Live API: /api/orders &amp; /api/products</span>
+    </div>
+  </div>
+
+  <script>
+    const shopInput = document.getElementById("shopInput");
+    const statusBadge = document.getElementById("statusBadge");
+    const authBanner = document.getElementById("authBanner");
+    const bannerTitle = document.getElementById("bannerTitle");
+    const bannerDesc = document.getElementById("bannerDesc");
+    const errorBox = document.getElementById("errorBox");
+    const connectedStoreLabel = document.getElementById("connectedStoreLabel");
+    const subtitle = document.getElementById("subtitle");
+
+    const topAuthBtn = document.getElementById("topAuthBtn");
+    const mainAuthBtn = document.getElementById("mainAuthBtn");
+    const syncBtn = document.getElementById("syncBtn");
+
+    const tabOrders = document.getElementById("tabOrders");
+    const tabRisk = document.getElementById("tabRisk");
+    const tabProducts = document.getElementById("tabProducts");
+    const panelOrders = document.getElementById("panelOrders");
+    const panelRisk = document.getElementById("panelRisk");
+    const panelProducts = document.getElementById("panelProducts");
+
+    function normalizeShop(value) {
+      const cleaned = String(value || "")
+        .trim()
+        .toLowerCase()
+        .replace(/^https?:\/\//, "")
+        .replace(/\/.*$/, "");
+      if (!cleaned) return "";
+      return cleaned.endsWith(".myshopify.com") ? cleaned : `${cleaned}.myshopify.com`;
+    }
+
+    function getInitialShop() {
+      const params = new URLSearchParams(window.location.search);
+      const fromQuery = normalizeShop(params.get("shop"));
+      if (fromQuery) {
+        localStorage.setItem("margin_radar_shop", fromQuery);
+        return fromQuery;
+      }
+
+      const fromStorage = normalizeShop(localStorage.getItem("margin_radar_shop"));
+      if (fromStorage) return fromStorage;
+
+      if (document.referrer) {
+        try {
+          const refUrl = new URL(document.referrer);
+          const parts = refUrl.pathname.split("/store/");
+          if (parts[1]) {
+            const handle = parts[1].split("/")[0];
+            if (handle) return `${handle}.myshopify.com`;
+          }
+        } catch (_) {}
+      }
+
+      return "";
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function showError(message) {
+      errorBox.style.display = "block";
+      errorBox.textContent = message;
+      statusBadge.className = "badge error";
+      statusBadge.textContent = "Attention needed";
+    }
+
+    function clearError() {
+      errorBox.style.display = "none";
+      errorBox.textContent = "";
+    }
+
+    function updateShopUI(shop) {
+      shopInput.value = shop;
+      if (shop) {
+        localStorage.setItem("margin_radar_shop", shop);
+        connectedStoreLabel.textContent = `Connected store: ${shop}`;
+        subtitle.textContent = `Store: ${shop} · Live Shopify store analytics`;
+        topAuthBtn.textContent = `Authorize ${shop}`;
+        mainAuthBtn.textContent = `Authorize ${shop}`;
+        bannerTitle.textContent = `Authorize ${shop}`;
+        bannerDesc.textContent = `Install and authorize ${shop} via OAuth to load live orders and products.`;
+      } else {
+        connectedStoreLabel.textContent = "Connected store: none";
+        subtitle.textContent = "Live Shopify store profit, risk, and order analytics";
+        topAuthBtn.textContent = "Authorize store";
+        mainAuthBtn.textContent = "Authorize store";
+        bannerTitle.textContent = "Store authorization required";
+        bannerDesc.textContent = "Enter your .myshopify.com domain and authorize the app to load live metrics.";
+      }
+    }
+
+    function startAuthorize() {
+      const shop = normalizeShop(shopInput.value);
+      if (!shop) {
+        showError("Please enter a valid Shopify store domain (e.g. your-store.myshopify.com).");
+        return;
+      }
+      updateShopUI(shop);
+      const authUrl = `/api/auth?shop=${encodeURIComponent(shop)}`;
+      if (window.top && window.top !== window.self) {
+        window.top.location.href = authUrl;
+      } else {
+        window.location.href = authUrl;
+      }
+    }
+
+    function renderOrders(orders) {
+      const tbody = document.getElementById("ordersBody");
+      const riskBody = document.getElementById("riskBody");
+
+      if (!Array.isArray(orders) || orders.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No live orders found for this store yet.</td></tr>`;
+        riskBody.innerHTML = `<tr><td colspan="4" class="empty-state">No orders available for risk evaluation.</td></tr>`;
+        document.getElementById("kpiRevenue").textContent = "$0.00";
+        document.getElementById("kpiOrders").textContent = "0";
+        document.getElementById("kpiRisk").textContent = "0";
+        return;
+      }
+
+      let revenue = 0;
+      let highRiskCount = 0;
+
+      tbody.innerHTML = orders.map((ord) => {
+        const amount = Number(ord.total_price ?? ord.current_total_price ?? 0) || 0;
+        revenue += amount;
+        const name = ord.name || ord.order_number || `#${ord.id || "—"}`;
+        const status = ord.financial_status || ord.fulfillment_status || "recorded";
+        const created = ord.created_at ? new Date(ord.created_at).toLocaleDateString() : "—";
+        return `
+          <tr>
+            <td>${escapeHtml(name)}</td>
+            <td>${escapeHtml(status)}</td>
+            <td>$${amount.toFixed(2)}</td>
+            <td>${escapeHtml(created)}</td>
+          </tr>
+        `;
+      }).join("");
+
+      riskBody.innerHTML = orders.map((ord) => {
+        const amount = Number(ord.total_price ?? ord.current_total_price ?? 0) || 0;
+        const name = ord.name || ord.order_number || `#${ord.id || "—"}`;
+        const isHigh = amount >= 300 || ord.financial_status === "pending";
+        if (isHigh) highRiskCount += 1;
+        return `
+          <tr>
+            <td>${escapeHtml(name)}</td>
+            <td>${isHigh ? "Elevated review" : "Normal"}</td>
+            <td>$${amount.toFixed(2)}</td>
+            <td>${isHigh ? "High order value or pending payment status" : "Standard order profile"}</td>
+          </tr>
+        `;
+      }).join("");
+
+      document.getElementById("kpiRevenue").textContent = `$${revenue.toFixed(2)}`;
+      document.getElementById("kpiOrders").textContent = String(orders.length);
+      document.getElementById("kpiRisk").textContent = String(highRiskCount);
+    }
+
+    function renderProducts(products) {
+      const tbody = document.getElementById("productsBody");
+      if (!Array.isArray(products) || products.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="empty-state">No live products found for this store yet.</td></tr>`;
+        document.getElementById("kpiProducts").textContent = "0";
+        return;
+      }
+
+      document.getElementById("kpiProducts").textContent = String(products.length);
+      tbody.innerHTML = products.map((prod) => `
+        <tr>
+          <td>${escapeHtml(prod.title || "Untitled product")}</td>
+          <td>${escapeHtml(prod.status || "active")}</td>
+          <td>${escapeHtml(prod.vendor || "—")}</td>
+        </tr>
+      `).join("");
+    }
+
+    async function syncStoreData() {
+      const shop = normalizeShop(shopInput.value);
+      if (!shop) {
+        updateShopUI("");
+        return;
+      }
+
+      updateShopUI(shop);
+      clearError();
+      statusBadge.className = "badge";
+      statusBadge.textContent = "Syncing...";
+
+      try {
+        const ordersRes = await fetch(`/api/orders?shop=${encodeURIComponent(shop)}`);
+        const ordersPayload = await ordersRes.json().catch(() => ({}));
+
+        if (!ordersRes.ok) {
+          authBanner.style.display = "block";
+          statusBadge.className = "badge";
+          statusBadge.textContent = "Authorization required";
+          showError(ordersPayload.error || `Orders sync failed (${ordersRes.status}). Authorize the store first.`);
+          return;
+        }
+
+        authBanner.style.display = "none";
+        statusBadge.className = "badge connected";
+        statusBadge.textContent = "Connected";
+
+        const ordersList = Array.isArray(ordersPayload.orders) ? ordersPayload.orders : [];
+        renderOrders(ordersList);
+        document.getElementById("ordersMeta").textContent = `Synced from ${shop}`;
+
+        const productsRes = await fetch(`/api/products?shop=${encodeURIComponent(shop)}`);
+        if (productsRes.ok) {
+          const productsPayload = await productsRes.json().catch(() => ({}));
+          const productsList = Array.isArray(productsPayload.products) ? productsPayload.products : [];
+          renderProducts(productsList);
+        }
+      } catch (err) {
+        showError(`Network error while syncing store data: ${err?.message || err}`);
+      }
+    }
+
+    function setActiveTab(tab) {
+      tabOrders.classList.toggle("active", tab === "orders");
+      tabRisk.classList.toggle("active", tab === "risk");
+      tabProducts.classList.toggle("active", tab === "products");
+
+      panelOrders.style.display = tab === "orders" ? "block" : "none";
+      panelRisk.style.display = tab === "risk" ? "block" : "none";
+      panelProducts.style.display = tab === "products" ? "block" : "none";
+    }
+
+    topAuthBtn.addEventListener("click", startAuthorize);
+    mainAuthBtn.addEventListener("click", startAuthorize);
+    syncBtn.addEventListener("click", syncStoreData);
+    shopInput.addEventListener("change", () => updateShopUI(normalizeShop(shopInput.value)));
+
+    tabOrders.addEventListener("click", () => setActiveTab("orders"));
+    tabRisk.addEventListener("click", () => setActiveTab("risk"));
+    tabProducts.addEventListener("click", () => setActiveTab("products"));
+
+    const initialShop = getInitialShop();
+    updateShopUI(initialShop);
+    if (initialShop) {
+      syncStoreData();
+    }
+  </script>
+</body>
+</html>
